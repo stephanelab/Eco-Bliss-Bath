@@ -1,37 +1,56 @@
-/// <reference types="cypress" />
-// ***********************************************
-// This example commands.ts shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add('login', (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-//
-// declare global {
-//   namespace Cypress {
-//     interface Chainable {
-//       login(email: string, password: string): Chainable<void>
-//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
-//     }
-//   }
-// }
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      login(username: string, password: string): Chainable<void>;
+      deleteBasket(token: string): Chainable<void>;
+      getBySel(selector: string): Chainable<JQuery<HTMLElement>>;
+    }
+  }
+}
+
+export {};
+
+Cypress.Commands.add('login', (username: string, password: string) => {
+  cy.env(['apiUrl']).then(({ apiUrl }) => {
+    cy.request({
+      method: 'POST',
+      url: `${apiUrl}/login`,
+      failOnStatusCode: false,
+      body: {
+        username,
+        password,
+      },
+    }).then((response) => {
+      window.localStorage.setItem('token', response.body.token); // à garder si besoin pour test frontend, sinon à supprimer
+    });
+  });
+});
+
+Cypress.Commands.add('deleteBasket', (token: string) => {
+  cy.env(['apiUrl']).then(({ apiUrl }) => {
+    cy.request({
+      method: 'GET',
+      url: `${apiUrl}/orders`,
+      failOnStatusCode: false,
+      headers: {
+        Authorization: 'Bearer ' + token,
+      },
+    }).then((response) => {
+      if (response.status !== 404) {
+        cy.wrap(response.body.orderLines).each((line: any) => {
+          cy.request({
+            method: 'DELETE',
+            url: `${apiUrl}/orders/${line.id}/delete`,
+            headers: {
+              Authorization: 'Bearer ' + token,
+            },
+          });
+        });
+      }
+    });
+  });
+});
+
+Cypress.Commands.add('getBySel', (selector) => {
+  return cy.get(`[data-cy=${selector}]`);
+});
