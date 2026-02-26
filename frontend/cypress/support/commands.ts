@@ -4,6 +4,7 @@ declare global {
       login(username: string, password: string): Chainable<void>;
       deleteBasket(token: string): Chainable<void>;
       getBySel(selector: string): Chainable<JQuery<HTMLElement>>;
+      loginFront(username: string, password: string): Chainable<void>;
     }
   }
 }
@@ -20,8 +21,6 @@ Cypress.Commands.add('login', (username: string, password: string) => {
         username,
         password,
       },
-    }).then((response) => {
-      window.localStorage.setItem('token', response.body.token); // à garder si besoin pour test frontend, sinon à supprimer
     });
   });
 });
@@ -53,4 +52,14 @@ Cypress.Commands.add('deleteBasket', (token: string) => {
 
 Cypress.Commands.add('getBySel', (selector) => {
   return cy.get(`[data-cy=${selector}]`);
+});
+
+Cypress.Commands.add('loginFront', (username: string, password: string) => {
+  cy.visit('/'); // Aller sur la page d'accueil
+  cy.getBySel('nav-link-login').click(); // Cliquer sur le lien  "Connexion"
+  cy.fixture('user').then((user) => {
+    cy.getBySel('login-input-username').type(user.username); // Taper le nom d'utilisateur
+    cy.getBySel('login-input-password').type(user.password); // Taper le mot de passe
+    cy.getBySel('login-submit').click(); // Cliquer sur le bouton de connexion
+  });
 });
