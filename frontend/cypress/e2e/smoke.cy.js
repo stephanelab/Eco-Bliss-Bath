@@ -8,9 +8,7 @@ describe("Smoke tests", () => {
     cy.getBySel("login-submit").should("be.visible");
   });
   it("should have the presence of button to add product in the card when logged in", () => {
-    cy.fixture("user").then((user) =>
-      cy.loginFront(user.username, user.password),
-    );
+    cy.loginFront();
     cy.getBySel("product-home-link").first().click();
     cy.getBySel("detail-product-add").should("be.visible");
   });

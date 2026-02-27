@@ -35,9 +35,7 @@ describe("Basket tests", () => {
   beforeEach(() => {
     // Connecter l'utilisateur
     cy.intercept("POST", "**/login").as("POSTlogin");
-    cy.fixture("user").then((user) =>
-      cy.loginFront(user.username, user.password),
-    );
+    cy.loginFront();
     // Attendre que la connexion soit finie, récupèrer le token et vider le panier
     cy.wait("@POSTlogin")
       .its("response.body.token")
@@ -59,7 +57,7 @@ describe("Basket tests", () => {
     cy.intercept("GET", "**/orders").as("getBasket");
     cy.getBySel("detail-product-add").click();
     cy.wait("@getBasket")
-      // Vérifier que le produit ait été ajouté au panier en vérifiant que la réponse de l'API contienne une ligne de commande avec l'id du produit sélectionné etune quantité de 1
+      // Vérifier que le produit n'ait pas été ajouté au panier en vérifiant que la réponse de l'API ne contienne pas de ligne de commande avec l'id du produit sélectionné
       .its("response.body.orderLines")
       .then((orderLines) => {
         const addedProduct = orderLines.find(
