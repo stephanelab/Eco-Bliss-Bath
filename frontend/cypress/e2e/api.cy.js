@@ -94,6 +94,7 @@ describe("API tests with correct login", () => {
         body: { product: 3, quantity: 1 },
       }).then((response) => {
         expect(response.status).not.to.eq(200);
+        expect(response.status).not.to.eq(405); // 405 est le code de réponse retourné par l'API quand la méthode n'est pas autorisée (par exemple, PUT authorisé mais pas POST), on vérifie qu'on n'a pas ce code pour s'assurer que le test ne passe pas juste parce que la méthode POST n'est pas autorisée pour cet endpoint
       });
     });
   });

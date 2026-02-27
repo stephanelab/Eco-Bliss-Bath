@@ -54,7 +54,7 @@ Cypress.Commands.add('getBySel', (selector) => {
   return cy.get(`[data-cy=${selector}]`);
 });
 
-Cypress.Commands.add('loginFront', (username: string, password: string) => {
+Cypress.Commands.add('loginFront', () => {
   cy.visit('/'); // Aller sur la page d'accueil
   cy.getBySel('nav-link-login').click(); // Cliquer sur le lien  "Connexion"
   cy.fixture('user').then((user) => {
