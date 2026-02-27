@@ -7,8 +7,6 @@ describe("Basket tests", () => {
     if (retries <= 0) {
       throw new Error("Stock jamais positif après plusieurs tentatives");
     }
-    productId = -1;
-    cy.log(productId);
     cy.visit("/");
     cy.intercept("GET", "**/products/[0-9]*").as("getProduct");
     cy.getBySel("product-home-link").first().click();
@@ -16,7 +14,6 @@ describe("Basket tests", () => {
       .wait("@getProduct")
       .its("response.body")
       .then((product) => {
-        cy.log("product = " + JSON.stringify(product));
         productId = product.id;
         return cy
           .getBySel("detail-product-stock")
@@ -30,9 +27,6 @@ describe("Basket tests", () => {
               return checkProductStock(retries - 1);
             }
             expect(nstock).to.be.greaterThan(0);
-            cy.log(
-              "Selected product with id " + productId + " and stock " + nstock,
-            );
             return cy.wrap(productId);
           });
       });
@@ -78,10 +72,6 @@ describe("Basket tests", () => {
   it("should have a good behaviour", () => {
     // Lancer la fonction pour sélectionner un produit et vérifier que le stock du produit est positif
     checkProductStock().then((productId) => {
-      // Récupérer l'URL du produit sélectionné pour pouvoir y revenir plus tard
-      cy.url().then((url) => {
-        cy.wrap(url).as("savedUrl");
-      });
       // Cliquer sur le bouton "Ajouter au panier"
       cy.intercept("GET", "**/orders").as("getBasket");
       cy.getBySel("detail-product-add").click();
@@ -89,7 +79,6 @@ describe("Basket tests", () => {
         // Vérifier que le produit ait été ajouté au panier en vérifiant que la réponse de l'API contienne une ligne de commande avec l'id du produit sélectionné etune quantité de 1
         .its("response.body.orderLines")
         .then((orderLines) => {
-          cy.log("productId = " + productId);
           const addedProduct = orderLines.find(
             (OrderLine) =>
               OrderLine.product.id === Number(productId) &&
@@ -101,10 +90,8 @@ describe("Basket tests", () => {
       cy.url().should("include", "/cart");
       // Vérifier que le produit ait été ajouté au panier
       cy.getBySel("cart-line").should("have.length", 1);
-      // Retour sur la page du produit en utilisant l'URL sauvegardé
-      cy.get("@savedUrl").then((savedUrl) => {
-        cy.visit(savedUrl);
-      });
+      // Retour sur la page du produit
+      cy.visit(`/products/${productId}`);
       // Vérifier que le stock du produit ait été décrémenté de 1
       cy.getBySel("detail-product-stock")
         .should("exist") // Vérifier que le champ de disponibilité soit présent
@@ -121,17 +108,13 @@ describe("Basket tests", () => {
       // Vérifier qu'on ne puisse pas valider la modification de la quantité en vérifiant qu'on ne soit pas rediriger vers le panier
       cy.getBySel("detail-product-add").click();
       cy.wait(500); // Attendre un peu pour s'assurer que la redirection aurait eu le temps de se faire si elle devait se faire
-      cy.get("@savedUrl").then((savedUrl) => {
-        cy.url().should("eq", savedUrl);
-      });
+      cy.url().should("include", `/products/${productId}`);
       // Taper un chiffre supérieur à 20 dans le champ de quantité du produit
       cy.getBySel("detail-product-quantity").clear().type("50");
       // Vérifier qu'on ne puisse pas valider la modification de la quantité en vérifiant qu'on ne soit pas rediriger vers le panier
       cy.getBySel("detail-product-add").click();
       cy.wait(500); // Attendre un peu pour s'assurer que la redirection aurait eu le temps de se faire si elle devait se faire
-      cy.get("@savedUrl").then((savedUrl) => {
-        cy.url().should("eq", savedUrl);
-      });
+      cy.url().should("include", `/products/${productId}`);
     });
   });
 });
