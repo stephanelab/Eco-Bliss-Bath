@@ -2,7 +2,7 @@ declare global {
   namespace Cypress {
     interface Chainable {
       login(username: string, password: string): Chainable<void>;
-      deleteBasket(token: string): Chainable<void>;
+      deleteCart(token: string): Chainable<void>;
       getBySel(selector: string): Chainable<JQuery<HTMLElement>>;
       loginFront(username: string, password: string): Chainable<void>;
     }
@@ -25,7 +25,7 @@ Cypress.Commands.add('login', (username: string, password: string) => {
   });
 });
 
-Cypress.Commands.add('deleteBasket', (token: string) => {
+Cypress.Commands.add('deleteCart', (token: string) => {
   cy.env(['apiUrl']).then(({ apiUrl }) => {
     cy.request({
       method: 'GET',
