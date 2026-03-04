@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress';
 
 export default defineConfig({
+  projectId: 'a7cucx',
   allowCypressEnv: false,
   env: {
     apiUrl: 'http://localhost:8081',

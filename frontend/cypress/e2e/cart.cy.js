@@ -59,7 +59,9 @@ describe("Cart tests", () => {
     // Vérifier qu'on ne soit pas redirigé vers le panier
     cy.url().should("include", `/products/3`);
     // Vérifier que le produit n'ait pas été ajouté au panier en vérifiant que le panier soit vide
+    cy.intercept("GET", "**/orders").as("getCart");
     cy.visit("/cart");
+    cy.wait("@getCart");
     cy.getBySel("cart-line").should("have.length", 0);
   });
 
