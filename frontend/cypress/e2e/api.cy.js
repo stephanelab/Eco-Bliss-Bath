@@ -66,7 +66,7 @@ describe("API tests", () => {
     it("should add an available products in the cart of the user", function () {
       cy.env(["apiUrl"]).then(({ apiUrl }) => {
         cy.request({
-          method: "POST",
+          method: "PUT", // L'endpoint de l'API pour ajouter un produit dans le panier est actuellement en PUT, pas en POST
           url: `${apiUrl}/orders/add`,
           headers: {
             Authorization: "Bearer " + token,
@@ -86,7 +86,7 @@ describe("API tests", () => {
     it("should not add an unavailable products in the cart of the user", function () {
       cy.env(["apiUrl"]).then(({ apiUrl }) => {
         cy.request({
-          method: "POST",
+          method: "PUT", // L'endpoint de l'API pour ajouter un produit dans le panier est actuellement en PUT, pas en POST
           url: `${apiUrl}/orders/add`,
           headers: {
             Authorization: "Bearer " + token,
